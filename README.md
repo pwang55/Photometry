@@ -69,6 +69,7 @@ This script creates:
 Galaxies:
 
 `$ python path_to_script/plot_gal_spec_pdf.py clustername_merged_sdss(panstarrs)_allwise_eazy.cat`
+
 `$ python plot_gal_spec_pdf.py path_to_files/clustername_merged_sdss(panstarrs)_allwise_eazy.cat`
 
 Requires:
@@ -79,6 +80,7 @@ Requires:
 Stars:
 
 `$ python path_to_script/plot_star_spec_pdf.py clustername_mycatalog_sdss(panstarrs)_star_auto(psf).csv`
+
 `$ python plot_star_spec_pdf.py path_to_files/clustername_mycatalog_sdss(panstarrs)_star_auto(psf).csv`
 
 Requires:
