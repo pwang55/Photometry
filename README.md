@@ -2,9 +2,11 @@
 **Create Catalogs for Each Cutout Stack**
 
 In script directory:
+
 `./make_each_catalog.sh path_to_files/cutoutlist.txt`
 
 In data directory:
+
 `~/path_to_script/make_each_catalog.sh cutoutlist.txt`
 
 `cutoutlist.txt` should contain all the cutout stack images.
@@ -15,14 +17,15 @@ This script creates catalogs such as 1ne.cat.
 **Create Table for PanSTARRS Extinction Upload**
 
 In script directory:
+
 `$ python make_table_for_ps1_extinction.py path_to_file/cluster_panstarrs_radec.csv`
 
 In data directory:
+
 `$ path_to_script/python make_table_for_ps1_extinction.py cluster_panstarrs_radec.csv`
 
 This script generates a table of PanSTARRs ra/dec to upload to:
-https://irsa.ipac.caltech.edu/applications/DUST/
-To get the extinction information.
+https://irsa.ipac.caltech.edu/applications/DUST/ to get the extinction information.
 
 
 ------------------------------------
@@ -30,9 +33,11 @@ To get the extinction information.
 **Combine all Generated Catalogs/Zero points Calibration/Match with SDSS/PanSTARRS and ALLWISE**
 
 In script directory:
+
 `$ python combine_catalog_calibration.py [path to catalogs directory] [sdss/panstarrs] (optional arguments)`
 
 In catalog directory:
+
 `$ python path_to_script/combine_catalog_calibration.py [sdss/panstarrs] (optional arguments)`
 
 Required files:
@@ -62,6 +67,7 @@ This script creates:
 **Plot SDSS Spectra**
 
 Galaxies:
+
 `$ python path_to_script/plot_gal_spec_pdf.py clustername_merged_sdss(panstarrs)_allwise_eazy.cat`
 `$ python plot_gal_spec_pdf.py path_to_files/clustername_merged_sdss(panstarrs)_allwise_eazy.cat`
 
@@ -71,6 +77,7 @@ Requires:
 - All sdss spectra in the same folder
 
 Stars:
+
 `$ python path_to_script/plot_star_spec_pdf.py clustername_mycatalog_sdss(panstarrs)_star_auto(psf).csv`
 `$ python plot_star_spec_pdf.py path_to_files/clustername_mycatalog_sdss(panstarrs)_star_auto(psf).csv`
 
@@ -81,6 +88,7 @@ Requires:
 ------------------------------------
 
 From start to finish, in data folder:
+
 `$ ~/path_to_script/lazy_script.sh`
 
 Requires:
