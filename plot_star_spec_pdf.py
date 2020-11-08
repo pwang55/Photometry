@@ -14,7 +14,7 @@ from scipy.integrate import simps
 
 # plt.ion()
 
-path_file = sys.argv[1] # The path to the mycatalog gal file
+path_file = sys.argv[1] # The path to the mycatalog star file
 filename = path_file.split('/')[-1]
 clustername = filename.split('_')[0]
 path = path_file[:-len(filename)]

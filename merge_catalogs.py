@@ -1,3 +1,8 @@
+"""
+
+This code is outdated and no longer in use.
+
+"""
 import numpy as np
 from astropy.io import ascii
 from astropy.coordinates import SkyCoord
