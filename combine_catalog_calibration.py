@@ -25,7 +25,7 @@ Required files:
     cluster_star_sdss_radec.csv
     cluster_panstarrs_radec.csv
     cluster_panstarrs_extinction.txt
-    cluster_allwise_radec.txt                                       https://irsa.ipac.caltech.edu/cgi-bin/Gator/nph-dd
+    cluster_allwise_radec.txt                                       https://irsa.ipac.caltech.edu/cgi-bin/Gator/nph-scan?mission=irsa&submit=Select&projshort=WISE
 
 This script search for 1ne.cat~4sw.cat and match them with SDSS/PanSTARRS catalog, create mycatalog then merged with ALLWISE catalog.
 This script creates:
