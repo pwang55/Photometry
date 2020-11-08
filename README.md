@@ -40,10 +40,12 @@ cluster_gal_sdss_radec.csv
 cluster_star_sdss_radec.csv
 cluster_panstarrs_radec.csv
 cluster_panstarrs_extinction.txt
-cluster_allwise_radec.txt	(https://irsa.ipac.caltech.edu/cgi-bin/Gator/nph-dd)
+cluster_allwise_radec.txt (https://irsa.ipac.caltech.edu/cgi-bin/Gator/nph-scan?mission=irsa&submit=Select&projshort=WISE)
 
 This script search for 1ne.cat~4sw.cat and match them with SDSS/PanSTARRS catalog, create mycatalog then merged with ALLWISE catalog.
+
 This script creates:
+```
 clustername_mycatalog_sdss(panstarrs)_gal.csv                   calibrated and selected magnitudes, will change even if match=False
 clustername_mycatalog_sdss(panstarrs)_star_psf(auto).csv        calibrated psf and auto magnitudes for stars catalogs
 clustername_mycatalog_sdss(panstarrs)_gal(star)_eazy.cat        calibrated mycatalog as EAZY input format
@@ -52,6 +54,7 @@ clustername_mycatalog_sdss(panstarrs)_gal(star)_original.ecsv   uncalibrated mag
 clustername_mycatalog_sdss(panstarrs)_gal(star)_ds9.csv         csv file with just ra/dec for DS9 catalog tool
 clustername_mycatalog_gal(star)_w_sdss_spec_radec.txt           txt file with ra/dec of objects that have SDSS spectra, can be upload to:
                                                                 https://dr16.sdss.org/optical/spectrum/search to get the spectra fits files
+```
 
 ------------------------------------
 
