@@ -37,11 +37,11 @@ In catalog directory:
 
 Required files:
 
--cluster_gal_sdss_radec.csv
--cluster_star_sdss_radec.csv
--cluster_panstarrs_radec.csv
--cluster_panstarrs_extinction.txt
--cluster_allwise_radec.txt (https://irsa.ipac.caltech.edu/cgi-bin/Gator/nph-scan?mission=irsa&submit=Select&projshort=WISE)
+- cluster_gal_sdss_radec.csv
+- cluster_star_sdss_radec.csv
+- cluster_panstarrs_radec.csv
+- cluster_panstarrs_extinction.txt
+- cluster_allwise_radec.txt (https://irsa.ipac.caltech.edu/cgi-bin/Gator/nph-scan?mission=irsa&submit=Select&projshort=WISE)
 
 
 This script search for 1ne.cat~4sw.cat and match them with SDSS/PanSTARRS catalog, create mycatalog then merged with ALLWISE catalog.
