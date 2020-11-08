@@ -21,7 +21,7 @@ In data directory:
 `$ path_to_script/python make_table_for_ps1_extinction.py cluster_panstarrs_radec.csv`
 
 This script generates a table of PanSTARRs ra/dec to upload to:
-`https://irsa.ipac.caltech.edu/applications/DUST/`
+https://irsa.ipac.caltech.edu/applications/DUST/
 To get the extinction information.
 
 
