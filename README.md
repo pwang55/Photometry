@@ -101,4 +101,4 @@ Requires:
 - cluster_panstarrs_extinction.txt
 - merged_eazy_sdss.param
 - merged_eazy_panstarrs.param
-
+- A folder named eazy_photz
