@@ -1,3 +1,5 @@
+import warnings
+warnings.filterwarnings("ignore", category=UserWarning)
 import numpy as np
 import sys
 from astropy.io import ascii,fits
@@ -11,6 +13,7 @@ import scipy.optimize as opt
 from matplotlib.backends.backend_pdf import PdfPages
 import matplotlib.pyplot as plt
 from scipy.integrate import simps
+
 
 # plt.ion()
 

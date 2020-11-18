@@ -14,18 +14,19 @@ This script creates catalogs such as 1ne.cat.
 
 ------------------------------------
 
-**Create Table for PanSTARRS Extinction Upload**
+**Create Table for PanSTARRS/ALLWISE Extinction Upload**
 
 In script directory:
 
-`$ python make_table_for_ps1_extinction.py path_to_file/cluster_panstarrs_radec.csv`
+`$ python make_table_for_extinction.py path_to_file/`
 
-In data directory:
+In data folder:
 
-`$ path_to_script/python make_table_for_ps1_extinction.py cluster_panstarrs_radec.csv`
+`$ python path_to_script/make_table_for_extinction.py`
 
-This script generates a table of PanSTARRs ra/dec to upload to:
-https://irsa.ipac.caltech.edu/applications/DUST/ to get the extinction information.
+This script generates a table of PanSTARRS and ALLWISE ra/dec to upload to:
+https://irsa.ipac.caltech.edu/applications/DUST/
+To get the extinction information.
 
 
 ------------------------------------

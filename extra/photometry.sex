@@ -69,7 +69,7 @@ MAG_ZEROPOINT    0.0            # magnitude zero-point
 MAG_GAMMA        4.0            # gamma of emulsion (for photographic scans)
 GAIN             0.0            # detector gain in e-/ADU
 GAIN_KEY         GAIN           # keyword for detector gain in e-/ADU
-PIXEL_SCALE      1.0            # size of pixel in arcsec (0=use FITS WCS info)
+PIXEL_SCALE      0              # size of pixel in arcsec (0=use FITS WCS info)
  
 #------------------------- Star/Galaxy Separation ----------------------------
  
@@ -80,7 +80,7 @@ STARNNW_NAME     default.nnw    # Neural-Network_Weight table filename
  
 BACK_TYPE        AUTO           # AUTO or MANUAL
 BACK_VALUE       0.0            # Default background value in MANUAL mode
-BACK_SIZE        64             # Background mesh: <size> or <width>,<height>
+BACK_SIZE        40             # Background mesh: <size> or <width>,<height>
 BACK_FILTERSIZE  3              # Background filter: <size> or <width>,<height>
  
 BACKPHOTO_TYPE   GLOBAL         # can be GLOBAL or LOCAL

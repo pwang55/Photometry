@@ -40,6 +40,8 @@ This script creates:
 
 
 """
+import warnings
+warnings.filterwarnings("ignore", category=UserWarning)
 import numpy as np
 from astropy.table import Table, vstack, hstack
 from astropy.coordinates import concatenate, SkyCoord
@@ -54,6 +56,7 @@ from sklearn import linear_model
 import time
 import multiprocessing as mp
 import pathlib
+
 
 # plt.ion()
 sys.dont_write_bytecode=True
@@ -275,7 +278,6 @@ colnames.extend(calibration_extinction_colnames)
 
 
 panstarrs_A_EBV = {'panstarrs_g': 3.172, 'panstarrs_r': 2.271, 'panstarrs_i': 1.682, 'panstarrs_z': 1.322, 'panstarrs_y': 1.087}
-
 
 for x in range(len(filters)):
     filt = filters[x]
@@ -1061,10 +1063,19 @@ for i in range(len(filters)):
 
 # Read ALLWISE
 t = ascii.read(path + clustername + '_allwise_radec.txt')
+wise_A_EBV = {'WISE1': 0.189, 'WISE2': 0.146}
+allwise_extinction_tab = ascii.read(path + clustername + '_allwise_extinction.txt')
+aEBV = allwise_extinction_tab['E_B_V_SFD']
+w1_extinction = aEBV * wise_A_EBV['WISE1']
+w2_extinction = aEBV * wise_A_EBV['WISE2']
 callwise = SkyCoord(t['ra'], t['dec'], unit='deg')
 t.rename_columns(('w1mpro', 'w1sigmpro', 'w2mpro', 'w2sigmpro'), ('allwise_w1MAG', 'allwise_w1ERR', 'allwise_w2MAG', 'allwise_w2ERR'))
 t['allwise_w1MAG'] = t['allwise_w1MAG'] + allwise_ab_vega[0]
 t['allwise_w2MAG'] = t['allwise_w2MAG'] + allwise_ab_vega[1]
+if apply_extinction == True:
+    t['allwise_w1MAG'] = t['allwise_w1MAG'] - w1_extinction
+    t['allwise_w2MAG'] = t['allwise_w2MAG'] - w2_extinction
+
 allwise = t['allwise_w1MAG', 'allwise_w1ERR', 'allwise_w2MAG', 'allwise_w2ERR']
 
 

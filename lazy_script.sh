@@ -1,5 +1,11 @@
 #!/bin/bash
 
+
+if [ ! -d eazy_photz/ ]; then
+    mkdir eazy_photz
+fi
+
+
 # Get the absolute directory path of this script so that it can find extra/files
 script_dir=$(cd `dirname $0` && pwd)
 
