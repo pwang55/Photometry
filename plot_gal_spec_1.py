@@ -3,12 +3,13 @@
 Usage:
 
     In data folder:
-    $ python path_to_script/plot_star_spec_pdf.py clustername_mycatalog_sdss(panstarrs)_star_auto(psf).csv
+    $ python path_to_script/plot_gal_spec_1.py clustername_merged_sdss(panstarrs)_allwise_eazy.cat (number)
     
     In script folder:
-    $ python plot_star_spec_pdf.py path_to_files/clustername_mycatalog_sdss(panstarrs)_star_auto(psf).csv
+    $ python plot_gal_spec_1.py path_to_files/clustername_merged_sdss(panstarrs)_allwise_eazy.cat (number)
 
-This script creates a pdf of all spectra with photometry dots on top of them, using clustername_mycatalog_sdss(panstarrs)_star_auto(psf).csv
+The number for the second argument is the index or id number in the clustername_merged_sdss(panstarrs)_allwise_eazy.cat (the first column).
+This code is a modification to the plot_gal_spec_pdf.py that is useful for showing just one object's plot. plt.ion defaults to be on in the code.
 
 
 """
@@ -24,24 +25,41 @@ import subprocess
 import pandas as pd
 from glob import glob
 import scipy.optimize as opt
-from matplotlib.backends.backend_pdf import PdfPages
+# from matplotlib.backends.backend_pdf import PdfPages
 import matplotlib.pyplot as plt
 from scipy.integrate import simps
 
-
-
-# plt.ion()
-if len(sys.argv) == 1:
+if len(sys.argv) < 3:
     print(__doc__)
     sys.exit()
 
-path_file = sys.argv[1] # The path to the mycatalog star file
+
+plt.ion()
+
+ww = 14
+hh = 7
+titlefontsize = 12
+legendsize = 12
+xlabelsize = 12
+ylabelsize = 14
+myms = 6
+cms = 6
+crosssize = 6
+
+path_file = sys.argv[1] # The path to the mycatalog gal file
 filename = path_file.split('/')[-1]
 clustername = filename.split('_')[0]
-magtype = filename.split('.')[0].split('_')[-1]
-calibration_cat = filename.split('_')[2]
 path = path_file[:-len(filename)]
+calibration_cat = filename.split('_')[2]
+if calibration_cat != 'sdss' and calibration_cat != 'panstarrs':
+    print(calibration_cat)
+    print('Incorrect calibration catalog type, check filename!')
+    sys.exit()
 
+idx0 = int(sys.argv[2])
+
+cat = ascii.read(path_file)
+# month = cat.meta['month']
 month_dict = {'abell611': 'FebMar', \
             'abell370': 'Jan', \
             'abell1576': 'FebMar', \
@@ -53,16 +71,18 @@ month_dict = {'abell611': 'FebMar', \
             'zwicky1953': 'FebMar'}
 month = month_dict[clustername]
 
-
 script_dir = sys.path[0]
 filterpath = '/Users/brianwang76/sources/90Prime/Filters/'
 
 specs = np.array(glob(path + 'spec-*fits'))
+# zout = ascii.read(path + clustername + '_' + calibration_cat + '.zout')
+zout = ascii.read(path_file.replace('_eazy.cat', '.zout'))
 
 c = 3.0 * 10 ** 18
 scale0 = 10 ** 17
 
-pdf = PdfPages(path + clustername + '_' + calibration_cat + '_flux_compare_spectra_' + magtype + '.pdf')
+# pdf = PdfPages(path + clustername + '_' + calibration_cat + '_flux_compare_spectra.pdf')
+
 
 # function for fitting the arbritrary scale
 def scalefunc(a, x):
@@ -117,16 +137,21 @@ filt_lam = [4920, 5000, 5100, 5200, 5320, 5400, 5500, 5600, 5680, 5800, 5890, 60
 filt_table = Table()
 filt_table.add_columns([filt_name, filt_lam, filt_type], names=['name', 'lam', 'type'])
 
-# Read the catalog and find filters
-cat = ascii.read(path_file)
-# Find where magnitudes end
-imagerr_end = np.where(np.array(cat.colnames) == 'filter_count')[0][0]
-fnames_original = cat.colnames[2:imagerr_end:2]
-# Translate original filter names from gal_table to eazy filter names using dictionary
-fnames = [filt_Dict[fnames_original[x]] for x in range(len(fnames_original))]
+
+# # Find where magnitudes end
+# imagerr_end = np.where(np.array(cat.colnames) == 'filter_count')[0][0]
+# fnames_original = cat.colnames[2:imagerr_end:2]
+# # Translate original filter names from gal_table to eazy filter names using dictionary
+# fnames = [filt_Dict[fnames_original[x]] for x in range(len(fnames_original))]
+# hfilt = np.in1d(filt_table['name'], fnames)
+# filt_table = filt_table[hfilt]
+
+
+fnames = cat.colnames[4:-4:2]
+# print(fnames)
 hfilt = np.in1d(filt_table['name'], fnames)
 filt_table = filt_table[hfilt]
-
+# print(filt_table)
 
 # Read FILTER.RES.latest.info anc convert info into index and number of lines in each filter
 f = open(filterpath + 'FILTER.RES.latest.info')
@@ -173,10 +198,8 @@ for x in range(len(specs)):
 cspec = SkyCoord(ra, dec, unit='deg')
 
 
-if calibration_cat == 'sdss':
-    h = cat['zspec'] != -1
-else:
-    h = cat['zspec'] == -1
+
+h = cat['z_spec'] != -1
 
 cmy = SkyCoord(cat[h]['ra'], cat[h]['dec'], unit='deg')
 
@@ -191,15 +214,24 @@ cmy = cmy[hd]
 cspec = cspec[idx[hd]]
 specs = specs[idx[hd]]
 
-my_mags = cat[h][hd][cat.colnames[2:imagerr_end:2]]
-my_errs = cat[h][hd][cat.colnames[3:imagerr_end:2]]
+my_mags = cat[h][hd][cat.colnames[4:-4:2]]
+my_errs = cat[h][hd][cat.colnames[5:-4:2]]
+
+zout_zspec = zout[h][hd]['z_spec']
+zout_zphot = zout[h][hd]['z_m2']
+zout_id = zout[h][hd]['id']
+zout_1sigma = (zout[h][hd]['u68'] - zout[h][hd]['l68'])/2
 
 ras = cat[h][hd]['ra']
 decs = cat[h][hd]['dec']
 
 # Loop over each spectra to make plots
-for x in range(len(cmy)):
+# for x in range(len(cmy)):
+zout_x = np.where(np.array(zout_id) == idx0)[0][0]
+x = zout_x
+# print(x)
 
+if zout_zphot[x] > 0:
     spec = fits.open(specs[x])
     loglam = spec[1].data['loglam']
     lam = 10 ** loglam
@@ -247,6 +279,8 @@ for x in range(len(cmy)):
     final_flux_spec = np.array(final_flux_spec) / scale0
     final_type_my = np.array(final_type_my)
 
+    # print(final_lam)
+
     # h = (final_lam < max(lam)) & (final_lam > min(lam))
     h = (final_lam < max(lam)) & (final_lam > min(lam)) & (final_type_my == calibration_cat)
     final_scale, final_scale_err = opt.curve_fit(scalefunc, final_flux_my[h], final_flux_spec[h], sigma=final_fluxerr_my[h])
@@ -263,7 +297,7 @@ for x in range(len(cmy)):
     ybot = -0.5 / scale0
     ytop = 1.85 * max(final_flux_my)
     
-    fig = plt.figure(figsize=(15,10))
+    fig = plt.figure(figsize=(ww,hh))
     # fig = plt.figure()
     plt.plot(lam, best, 'c--', alpha=0.3, label='SDSS spectra model fit')
     plt.plot(lam, flux, 'b:', alpha=0.1, label='SDSS spectra')
@@ -275,22 +309,23 @@ for x in range(len(cmy)):
         calibration_label = 'PanSTARRS Flux'
         calibration_flux_label = 'Flux from Spectra with PanSTARRS filters'
     plt.errorbar(final_lam[final_type_my == 'narrowband'], final_flux_my[final_type_my == 'narrowband'], \
-        final_fluxerr_my[final_type_my == 'narrowband'], fmt='ro', label='Narrowband Observed Flux')
+        final_fluxerr_my[final_type_my == 'narrowband'], fmt='ro', label='Narrowband Observed Flux', markersize = myms)
     plt.errorbar(final_lam[final_type_my == calibration_cat], final_flux_my[final_type_my == calibration_cat], \
-        final_fluxerr_my[final_type_my == calibration_cat], fmt='go', label=calibration_label)
+        final_fluxerr_my[final_type_my == calibration_cat], fmt='go', label=calibration_label, markersize = cms)
 
-    plt.errorbar(final_lam[final_type_my == 'narrowband'], final_flux_spec[final_type_my == 'narrowband'], fmt='bx', label='Flux from Spectra with Narrowband Filters')
-    plt.errorbar(final_lam[final_type_my == calibration_cat], final_flux_spec[final_type_my == calibration_cat], fmt='kx', label=calibration_flux_label)
+    plt.errorbar(final_lam[final_type_my == 'narrowband'], final_flux_spec[final_type_my == 'narrowband'], fmt='bx', label='Flux from Spectra with Narrowband Filters', markersize = crosssize)
+    plt.errorbar(final_lam[final_type_my == calibration_cat], final_flux_spec[final_type_my == calibration_cat], fmt='kx', label=calibration_flux_label, markersize = crosssize)
 
-    plt.legend(loc=1, prop={'size': 10})
+    plt.legend(loc=1, prop={'size': legendsize})
     plt.grid()
     plt.xlim(3000, 10000)
     plt.ylim(ybot, ytop)
-    plt.xlabel(r'$\lambda  [\AA]$', fontsize=12)
-    plt.ylabel(r'$f_\lambda  [erg/s/cm^2/\AA]$', fontsize=15)
-    # plt.title(r'$id: {}$  $z_s={}$,  $z_p={:.4f}\pm{:.4f}$,  $\sigma_z/(1+z_p)={:.4f}\%$,  $(z_s-z_p)/(1+z_s)={:.4f}\%$'.format(zout_id[x], zout_zspec[x], zout_zphot[x], \
-    #     zout_1sigma[x], 100 * zout_1sigma[x] / (1 + zout_zphot[x]), 100 * (zout_zphot[x] - zout_zspec[x]) / (1 + zout_zspec[x])), fontsize=12)
-    pdf.savefig(fig)
-    plt.close()
+    plt.xlabel(r'$\lambda  [\AA]$', fontsize=xlabelsize)
+    plt.ylabel(r'$f_\lambda  [erg/s/cm^2/\AA]$', fontsize=ylabelsize)
+    plt.title(r'$z_s={}$,  $z_p={:.4f}\pm{:.4f}$,  $\sigma_{{z_p}}/(1+z_p)={:.4f}\%$,  $(z_s-z_p)/(1+z_s)={:.4f}\%$'.format(zout_zspec[x], zout_zphot[x], \
+        zout_1sigma[x], 100 * zout_1sigma[x] / (1 + zout_zphot[x]), 100 * (zout_zphot[x] - zout_zspec[x]) / (1 + zout_zspec[x])), fontsize=titlefontsize)
+    # pdf.savefig(fig)
+    # plt.close()
+    plt.tight_layout()
 
-pdf.close()
+# pdf.close()

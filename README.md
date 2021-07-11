@@ -78,6 +78,15 @@ Requires:
 - clustername_merged_sdss(panstarrs)_allwise.zout
 - All sdss spectra in the same folder
 
+Viewing a single object:
+
+`$ python path_to_script/plot_gal_spec_1.py clustername_merged_sdss(panstarrs)_allwise_eazy.cat (number)`
+    
+
+`$ python plot_gal_spec_1.py path_to_files/clustername_merged_sdss(panstarrs)_allwise_eazy.cat (number)`
+
+The number in the second argument is the "id" number of that specific object from the first column of the eazy.cat file
+
 Stars:
 
 `$ python path_to_script/plot_star_spec_pdf.py clustername_mycatalog_sdss(panstarrs)_star_auto(psf).csv`
@@ -103,3 +112,31 @@ Requires:
 - merged_eazy_sdss.param
 - merged_eazy_panstarrs.param
 - A folder named eazy_photz
+
+This script does all the photometry action at once:
+1. Use SExtractor to create catalogs for each images
+2. Combine catalogs together and combine with SDSS/PanSTARRS & ALLWISE, then calibrate zero points
+3. Run EAZY to get photo-z
+4. Combine EAZY .zout with spec-z and .cat to create .zall
+5. Copy .zall files to a testing folder for plotting
+
+To disable any step simply comment out the lines. This script has to be run in the data folder.
+
+If only need to run steps 3 to 5, run similar script:
+
+`$ ~/path_to_script/eazy_lazy.sh`
+
+Steps 3 to 5 are exactly the same in these two scripts.
+
+------------------------------------
+
+To combine .zout with .cat and all specz:
+
+In data folder (where folder eazy_photz and file clustername_merged_sdss(panstarrs)_allwise_eazy.cat are)
+
+`python ~/path_to_script/zspecs_combine.py`
+
+In script folder (path_to_files is where folder eazy_photz and file eazy.cat are):
+
+`python zspec_combine.py path_to_files`
+

@@ -1,3 +1,17 @@
+"""
+
+Usage:
+
+    In data folder:
+    $ python path_to_script/plot_gal_spec_pdf.py clustername_merged_sdss(panstarrs)_allwise_eazy.cat
+    
+    In script folder:
+    $ python plot_gal_spec_pdf.py path_to_files/clustername_merged_sdss(panstarrs)_allwise_eazy.cat
+
+This script creates a pdf of all spectra with photometry dots on top of them, using clustername_merged_sdss(panstarrs)_allwise_eazy.cat
+
+
+"""
 import warnings
 warnings.filterwarnings("ignore", category=UserWarning)
 import numpy as np
@@ -16,6 +30,10 @@ from scipy.integrate import simps
 
 
 # plt.ion()
+if len(sys.argv) == 1:
+    print(__doc__)
+    sys.exit()
+
 
 path_file = sys.argv[1] # The path to the mycatalog gal file
 filename = path_file.split('/')[-1]
@@ -28,9 +46,20 @@ if calibration_cat != 'sdss' and calibration_cat != 'panstarrs':
     sys.exit()
 
 cat = ascii.read(path_file)
-# month = cat.meta['month']
-# TEMP
-month = 'FebMar'
+# month = 'FebMar'
+# month = 'Jan'
+# Determine month
+month_dict = {'abell611': 'FebMar', \
+            'abell370': 'Jan', \
+            'abell1576': 'FebMar', \
+            'macs0329': 'Jan', \
+            'macs0717': 'FebMar', \
+            'macs1115': 'Jan', \
+            'macs1149': 'Jan', \
+            'rxj1532': 'FebMar', \
+            'zwicky1953': 'FebMar'}
+month = month_dict[clustername]
+
 
 script_dir = sys.path[0]
 filterpath = '/Users/brianwang76/sources/90Prime/Filters/'
@@ -228,7 +257,7 @@ for x in range(len(cmy)):
                 final_flux_spec.append(ave_flux)
                 obd_flux = mag2flux(filt_table[y]['lam'], my_mag[y])                # Observed flux converted from magnitude
                 final_flux_my.append(obd_flux)
-                obd_flux_err = 0.4 * obd_flux * my_err[y]
+                obd_flux_err = 1 / 1.087 * obd_flux * my_err[y]
                 final_fluxerr_my.append(obd_flux_err)
 
         final_flux_my = np.array(final_flux_my)# * scale0

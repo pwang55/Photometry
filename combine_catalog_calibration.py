@@ -56,10 +56,68 @@ from sklearn import linear_model
 import time
 import multiprocessing as mp
 import pathlib
-
+import os.path
 
 # plt.ion()
 sys.dont_write_bytecode=True
+
+
+# ========================================== PARAMETERS ================================================================
+
+# Default values
+# Parameters
+barypeakdiff = 1.0
+match_criteria = 1.0
+sdss_calibration_gals_magtype = 'modelMag'
+my_gals_magtype_sdss = 'MAG_AUTO'           # MAG_AUTO, MAG_PETRO, MAG_MODEL, MAG_HYBRID, MAG_DISK, MAG_SPHEROID
+my_gals_magtype_panstarrs = 'MAG_AUTO'      # MAG_AUTO, MAG_PETRO, MAG_MODEL, MAG_HYBRID, MAG_DISK, MAG_SPHEROID
+my_stars_magtype = 'hybrid'                 # mag type used for star calibration, auto/psf/hybrid
+apply_extinction = True
+read_only = False
+make_plot = True
+null_fillval = -99.0
+apply_b_spectra_correction = True
+
+# Calibration Criteria
+x_cutoff = 1.05
+ransac_iterations = 200
+panstarrs_classification_psc = 0.83
+
+# Plotting options
+cmap = 'viridis'
+linecolor = 'coral'
+linealpha = 1.0             # fitted mx+b line in each filter alpha
+markersize0 = 15            # all data points markersize 
+markersize1 = 20            # points that are used to fit witn cmap
+linewidth0 = 1              # r-i vs g-r plot linewidth
+linewidth1 = 1              # fitted mx+b in each filter linewidth
+small_title_fontsize = 8    # fontsize of filter wavelength
+xlabelsize = 12             # labelsize for g-r
+ylabelsize = 12             # labelsize for narrowband-r
+titlesize = 12              # title size of the whole plot
+ticksize = 6                # ticksize of each filter plot
+xlim_l = -0.25
+xlim_h = 2.25
+
+
+# Add these values to w1 and w2 mag to get AB mag
+# allwise_ab_vega = [2.699, 3.339]  # From Seth
+allwise_ab_vega = [2.661, 3.301]    # From EAZY filter files
+
+
+peakmax_c = 60000           # Not currently in use
+peakmin_c = 2000            # Not currently in use
+flag_c = 1
+calibrationmagmax = 30
+calibrationmagmin = 15
+fwhmmax_c = 6               # Not currently in use
+fwhmmin_c = 1               # Not currently in use
+
+
+month_Dict = {'abell1576': 'FebMar', 'abell370': 'Jan', 'abell611': 'FebMar', 'macs0329': 'Jan', 'macs0717': \
+                'FebMar', 'macs1115': 'Jan', 'macs1149': 'Jan', 'rxj1532': 'FebMar', 'zwicky1953': 'FebMar'}
+
+# ======================================================================================================================
 
 
 path = ''
@@ -90,25 +148,6 @@ if calibration_cat != 'sdss' and calibration_cat != 'panstarrs':
     sys.exit()
 
 
-
-
-# Default values
-# Parameters
-barypeakdiff = 1.0
-match_criteria = 1.0
-sdss_calibration_gals_magtype = 'modelMag'
-my_stars_magtype = 'hybrid'   # mag type used for star calibration, auto/psf/hybrid
-apply_extinction = True
-read_only = False    # Match catalog or just read from existing ones for plot, the only difference is the matching part
-make_plot = True
-# TEMP
-# TODO find a way to detect Jan or not
-month = 'FebMar'                # Jan or FebMar
-
-# Calibration Criteria
-x_cutoff = 1.05
-ransac_iterations = 200
-panstarrs_classification_psc = 0.83
 
 nargs = len(sys.argv)
 for x in range(rest_arg_start, nargs):
@@ -158,12 +197,18 @@ for x in range(rest_arg_start, nargs):
     if arg_type == 'psc':
         panstarrs_classification_psc = float(arg_TF)
 
+    if arg_type == 'my_gals_magtype_sdss':
+        my_gals_magtype_sdss = str(arg_TF)
+
+    if arg_type == 'my_gals_magtype_panstarrs':
+        my_gals_magtype_panstarrs = str(arg_TF)
 
 
 globfilenames = glob(path + 'cutout_stack_*fits')
 globfilenames.extend(glob(path + '*radec.csv'))
 clustername = globfilenames[0].split('/')[-1].split('_')[2]
 
+month = month_Dict[clustername]
 
 if calibration_cat == 'sdss':
     if (not os.path.exists(path + clustername + '_gal_sdss_radec.csv')) or (not os.path.exists(path + clustername + '_star_sdss_radec.csv')):
@@ -182,38 +227,9 @@ if not os.path.exists(path + clustername + '_allwise_radec.txt'):
 print('calibration_cat={}\nmatch={}\nplot={}\nstarmag={}\nmatch_criteria={}\nx_cutoff={}\nransac_iterations={}'.format(calibration_cat, \
     not read_only, make_plot, my_stars_magtype, match_criteria, x_cutoff, ransac_iterations))
 if calibration_cat == 'sdss':
-    print('sdssmag={}'.format(sdss_calibration_gals_magtype))
+    print('sdssmag={}\nmy_gals_magtype={}'.format(sdss_calibration_gals_magtype, my_gals_magtype_sdss))
 elif calibration_cat == 'panstarrs':
-    print('panstarrs_classification_psc={}'.format(panstarrs_classification_psc))
-
-
-
-peakmax_c = 60000
-peakmin_c = 2000
-flag_c = 1
-calibrationmagmax = 30
-calibrationmagmin = 15
-fwhmmax_c = 6
-fwhmmin_c = 1
-
-
-# Plotting options
-cmap = 'viridis'
-linecolor = 'coral'
-linealpha = 1.0
-markersize0 = 10
-markersize1 = 15
-markersize2 = 5 # not using at the moment
-linewidth0 = 1
-linewidth1 = 1
-linewidth2 = 1
-small_title_fontsize = 8
-xlim_l = -0.25
-xlim_h = 2.25
-ylim_l = -30
-ylim_h = -28
-
-
+    print('panstarrs_classification_psc={}\nmy_gals_magtype={}'.format(panstarrs_classification_psc, my_gals_magtype_panstarrs))
 
 
 
@@ -223,8 +239,16 @@ if month == 'FebMar':
 elif month == 'Jan':
     filters = ['1sw', '1ne', '1nw', '3nw', '1se', '2nw', '3ne', '2ne', '3sw', '2sw', '3se', '2se', '4nw', '4ne', '4sw', '4se']
 
+actual_filters = []
+filters_TFmask = []
+for x in range(len(filters)):
+    if os.path.isfile(path + 'cats_' + calibration_cat + '/' + filters[x] + '.cat'):
+        actual_filters.append(filters[x])
+        filters_TFmask.append(True)
+    else:
+        filters_TFmask.append(False)
 
-
+filters = actual_filters
 
 
 if calibration_cat == 'sdss':
@@ -287,8 +311,9 @@ for x in range(len(filters)):
 if read_only == False:
     print('')
     tabs_Dict = {}
+    actual_filters = []
     for x in range(len(filters)):
-        tab = ascii.read(path + filters[x] + '.cat')
+        tab = ascii.read(path + 'cats_' + calibration_cat + '/' + filters[x] + '.cat')
         c1 = SkyCoord(tab['ALPHA_J2000'], tab['DELTA_J2000'], unit='deg')
         c2 = SkyCoord(tab['ALPHAPEAK_J2000'], tab['DELTAPEAK_J2000'], unit='deg')
         diff = c1.separation(c2)
@@ -441,7 +466,8 @@ if read_only == False:
                             dec00 = tabs_Dict[calibration_cat][calibration_rows_idxs[k]]['DELTA_J2000']
                             ra0s.append(ra00)
                             dec0s.append(dec00)
-                            obj00 = Table([[0] * 16, filters, [x] * 16], names=['row_index', 'catalog_key', 'group_id'])
+                            nfilters = len(filters)
+                            obj00 = Table([[0] * nfilters, filters, [x] * nfilters], names=['row_index', 'catalog_key', 'group_id'])
                             obj00.add_row([calibration_rows_idxs[k], calibration_cat,0])
                             objs.append(obj00)
 
@@ -532,8 +558,18 @@ if read_only == False:
                     for j in range(len(obj1)-1):
                         row_idx = obj1[j]['row_index']
                         filtname = obj1[j]['catalog_key']
-                        mag_auto = tabs_Dict[filtname][row_idx]['MAG_AUTO']
-                        err_auto = tabs_Dict[filtname][row_idx]['MAGERR_AUTO']
+                        if i == 0:
+                            if calibration_cat == 'sdss':
+                                # For gal_table, grab the magtype that you choose (MAG_AUTO/MAG_PETRO/MAG_MODEL...), not necessarily MAG_AUTO even though the variable name is mag_auto
+                                mag_auto = tabs_Dict[filtname][row_idx][my_gals_magtype_sdss]
+                                err_auto = tabs_Dict[filtname][row_idx][my_gals_magtype_sdss.split('_')[0] + 'ERR_' + my_gals_magtype_sdss.split('_')[1]]
+                            elif calibration_cat == 'panstarrs':
+                                mag_auto = tabs_Dict[filtname][row_idx][my_gals_magtype_panstarrs]
+                                err_auto = tabs_Dict[filtname][row_idx][my_gals_magtype_panstarrs.split('_')[0] + 'ERR_' + my_gals_magtype_panstarrs.split('_')[1]]
+                        elif i == 1:
+                            # For star_table, mag_auto will always be MAG_AUTO
+                            mag_auto = tabs_Dict[filtname][row_idx]['MAG_AUTO']
+                            err_auto = tabs_Dict[filtname][row_idx]['MAGERR_AUTO']
                         mag_psf = tabs_Dict[filtname][row_idx]['MAG_PSF']
                         err_psf = tabs_Dict[filtname][row_idx]['MAGERR_PSF']
                         flag = tabs_Dict[filtname][row_idx]['FLAGS']
@@ -707,7 +743,7 @@ if make_plot == True:
 print('\n(r-i) vs (g-r) b = {:.6f}\n'.format(bt))
 
 if make_plot == True:
-    fig, axs = plt.subplots(4, 4, figsize=(15, 12), sharex=True, sharey=True)
+    fig, axs = plt.subplots(4, 4, figsize=(15, 12), sharex=True, sharey=False)
     fig.tight_layout()
     fig.subplots_adjust(top=0.95, bottom=0.05, left=0.08,right=0.98)
 
@@ -715,9 +751,12 @@ if make_plot == True:
 orderx = [3, 3, 3, 3, 2, 2, 2, 2, 1, 1, 1, 1, 0, 0, 0, 0]
 ordery = [0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3]
 if month == 'FebMar':
-    filter_lam = ['5100', '5200', '5320', '5400', '5500', '5600', '5680', '5800', '5890', '6000', '6100', '6200', '6300', '6400', '6500', '6600']
+    filter_lam = np.array(['5100', '5200', '5320', '5400', '5500', '5600', '5680', '5800', '5890', '6000', '6100', '6200', '6300', '6400', '6500', '6600'])
 elif month == 'Jan':
-    filter_lam = ['4920', '5000', '5100', '5200', '5320', '5400', '5500', '5600', '5680', '5800', '5890', '6000', '6100', '6200', '6300', '6400']
+    filter_lam = np.array(['4920', '5000', '5100', '5200', '5320', '5400', '5500', '5600', '5680', '5800', '5890', '6000', '6100', '6200', '6300', '6400'])
+
+
+filter_lam = filter_lam[filters_TFmask]
 xline = np.arange(-5,5,0.5)
 
 filt_name_for_record = []
@@ -725,6 +764,71 @@ filt_lam_for_record = []
 b_value = []
 berr_value = []
 fit_mags = []
+
+# Dictionary for b correction term from actual SDSS spectra
+if apply_b_spectra_correction == True:
+    # Using 698 SEDs to calibrate
+    b_spectra_correction_Dict_sdss = {'4920': 0.021081905200741817, '5000': -0.015733934540172863, '5100': -0.027419333943118483, '5200': -0.02953593608211138, \
+                                '5320': -0.0053906074904824085, '5400': -0.0044880428835484395, '5500': -0.0049806868150285835, '5600': -0.006016068145396759, \
+                                '5680': -0.002651410414121113, '5800': -0.0027220452878439997, '5890': -0.04159973136949347, '6000': -0.006519650156443971, \
+                                '6100': -0.002927680956932478, '6200': 0.00035885025490195834, '6300': -0.004846132545664436, '6400': -0.010346126433205307, \
+                                '6500': 0.010897822416220363, '6600': 0.04194828503459799,}
+
+    b_spectra_correction_errDict_sdss = {'4920': 0.0015531780276028544, '5000': 0.001559402535974323, '5100': 0.001594591617123951, '5200': 0.00202382628478408, \
+                                '5320': 0.002014247069868021, '5400': 0.0013678902544186381, '5500': 0.0012828750784658436, '5600': 0.0017947161977452768, \
+                                '5680': 0.001843115463545148, '5800': 0.001559804724512924, '5890': 0.0016359537865492761, '6000': 0.0005693145485748402, \
+                                '6100': 0.0005403462873010492, '6200': 0.000264381234352183, '6300': 0.0003023198499966118, '6400': 0.004994764239481349, \
+                                '6500': 0.0009764994170727277, '6600': 0.0016989610845703188,}
+
+    # Using ~20 SED from my fields
+    # b_spectra_correction_Dict_sdss = {'4920': 0.029814306098656578, '5000': -0.0028190004933502286, '5100': -0.0090861137151594, '5200': 0.0014083853337358892, \
+    #                             '5320': -3.491933037036188e-05, '5400': 0.0017521731522023949, '5500': -0.005681027029167839, '5600': -0.006912626095401223, \
+    #                             '5680': -0.011787154323160288, '5800': -0.010208659392585119, '5890': -0.0035654361308840956, '6000': -0.007100657295703025, \
+    #                             '6100': -0.00349335243576131, '6200': 0.0027922959870733885, '6300': 0.0012413967965923163, '6400': 0.0047055432862229225, \
+    #                             '6500': 0.01774743228998505, '6600': 0.03892362187444068,}
+
+    # b_spectra_correction_errDict_sdss = {'4920': 0.01441858272811864, '5000': 0.009490856461617382, '5100': 0.009831833775081756, '5200': 0.014944580719957717, \
+    #                             '5320': 0.011920805349814928, '5400': 0.012267794293880406, '5500': 0.011352365261750196, '5600': 0.00969051406970445, \
+    #                             '5680': 0.009564905096287737, '5800': 0.009359890453288501, '5890': 0.005547851126312819, '6000': 0.007519828700178888, \
+    #                             '6100': 0.003344670308370953, '6200': 0.00365510650161222, '6300': 0.0036435704704655706, '6400': 0.005508197748384842, \
+    #                             '6500': 0.008158579989755532, '6600': 0.00960722486811168,}
+
+    b_spectra_correction_Dict_panstarrs = {'4920': 0.01562103301544379, '5000': -0.023583350426620985, '5100': -0.02703413492531374, '5200': -0.017907771491671068, \
+                                '5320': -0.009142330116112343, '5400': -0.0038189304273664585, '5500': -0.0036810375213502063, '5600': -0.004073235768918441, \
+                                '5680': -0.001228688854930752, '5800': -0.0020231022671291813, '5890': -0.03782788045402074, '6000': -0.008894007983504822, \
+                                '6100': -0.001218747452394827, '6200': 0.0004789594611687742, '6300': -0.004670494930104791, '6400': -0.004230683795679477, \
+                                '6500': 0.017756999880346926, '6600': 0.03711536933003344}
+
+    b_spectra_correction_errDict_panstarrs = {'4920': 0.001235394628705121, '5000': 0.001517678610244854, '5100': 0.0010786743875286198, '5200': 0.0013973577524042647, \
+                                '5320': 0.0012891508710228938, '5400': 0.0012006635304456293, '5500': 0.001198466456869297, '5600': 0.001457792714415801, \
+                                '5680': 0.0014756939780594279, '5800': 0.0017105403468066548, '5890': 0.0016607389560113536, '6000': 0.0006000345086490612, \
+                                '6100': 0.000673288491636023, '6200': 0.00015299898998969035, '6300': 0.0003145336680449157, '6400': 0.00038649067764463357, \
+                                '6500': 0.001366910348873381, '6600': 0.002081687538197981}
+
+else:
+    b_spectra_correction_Dict_sdss = {'4920': 0.0, '5000': 0.0, '5100': 0.0, '5200': 0.0, \
+                                '5320': 0.0, '5400': 0.0, '5500': 0.0, '5600': 0.0, \
+                                '5680': 0.0, '5800': 0.0, '5890': 0.0, '6000': 0.0, \
+                                '6100': 0.0, '6200': 0.0, '6300': 0.0, '6400': 0.0, \
+                                '6500': 0.0, '6600': 0.0,}
+
+    b_spectra_correction_errDict_sdss = {'4920': 0.0, '5000': 0.0, '5100': 0.0, '5200': 0.0, \
+                                '5320': 0.0, '5400': 0.0, '5500': 0.0, '5600': 0.0, \
+                                '5680': 0.0, '5800': 0.0, '5890': 0.0, '6000': 0.0, \
+                                '6100': 0.0, '6200': 0.0, '6300': 0.0, '6400': 0.0, \
+                                '6500': 0.0, '6600': 0.0,}
+
+    b_spectra_correction_Dict_panstarrs = {'4920': 0.0, '5000': 0.0, '5100': 0.0, '5200': 0.0, \
+                                '5320': 0.0, '5400': 0.0, '5500': 0.0, '5600': 0.0, \
+                                '5680': 0.0, '5800': 0.0, '5890': 0.0, '6000': 0.0, \
+                                '6100': 0.0, '6200': 0.0, '6300': 0.0, '6400': 0.0, \
+                                '6500': 0.0, '6600': 0.0,}
+
+    b_spectra_correction_errDict_panstarrs = {'4920': 0.0, '5000': 0.0, '5100': 0.0, '5200': 0.0, \
+                                '5320': 0.0, '5400': 0.0, '5500': 0.0, '5600': 0.0, \
+                                '5680': 0.0, '5800': 0.0, '5890': 0.0, '6000': 0.0, \
+                                '6100': 0.0, '6200': 0.0, '6300': 0.0, '6400': 0.0, \
+                                '6500': 0.0, '6600': 0.0,}
 
 
 def ransac_iterations_fx(x0, y0, dy, likelihood, child):
@@ -847,15 +951,32 @@ for f in range(len(filters)):
             y0 = y0a
             cts = ctsa
 
+    # Apply b spectra correction
+    if calibration_cat == 'sdss':
+        b_spectra_correction_Dict = b_spectra_correction_Dict_sdss
+        b_spectra_correction_errDict = b_spectra_correction_errDict_sdss
+
+    elif calibration_cat == 'panstarrs':
+        b_spectra_correction_Dict = b_spectra_correction_Dict_panstarrs
+        b_spectra_correction_errDict = b_spectra_correction_errDict_panstarrs
+
+        
+    b = b - b_spectra_correction_Dict[filter_lam[f]]
+    err_b = np.sqrt(err_b ** 2 + b_spectra_correction_errDict[filter_lam[f]]** 2)
 
     b_value.append(b)
     berr_value.append(err_b)
     filt_name_for_record.append(filt)
     filt_lam_for_record.append(filter_lam[f])
     fit_mags.append(fit_mag)
+    if b_spectra_correction_Dict[filter_lam[f]] > 0:
+        b_corr_string = '-' + '{:f}'.format(np.abs(b_spectra_correction_Dict[filter_lam[f]]))[:8]
+    else:
+        b_corr_string = '+' + '{:f}'.format(np.abs(b_spectra_correction_Dict[filter_lam[f]]))[:8]
 
-    print('{}\t{}\tauto: {:.6f} +- {:.6f}\tpsf: {:.6f} +- {:.6f}\tselect {}\t{:.6f} {:.6f} {:.6f} {:.6f}'.format(filter_lam[f], \
-        filt, b_a, err_b_a, b_p, err_b_p, fit_mag, np.sqrt(cov_a2[1, 1]), np.sqrt(cov_p2[1, 1]), cov_a2[0, 1] * 1e7, cov_p2[0, 1] * 1e7))
+
+    print('{} {}  auto: {:.6f} +- {:.6f} | psf: {:.6f} +- {:.6f} ({})  select {}\t{:.6f} {:.6f} {:.6f} {:.6f}'.format(filter_lam[f], \
+        filt, b_a, err_b_a, b_p, err_b_p, b_corr_string, fit_mag, np.sqrt(cov_a2[1, 1]), np.sqrt(cov_p2[1, 1]), cov_a2[0, 1] * 1e7, cov_p2[0, 1] * 1e7))
 
 
     # Record zero points and err_b
@@ -869,17 +990,23 @@ for f in range(len(filters)):
     star_table[filt + 'ERR_AUTO'][h99s_auto] = np.sqrt(star_table[filt + 'ERR_AUTO'][h99s_auto] ** 2 + err_b ** 2)
     h99g_auto = gal_table[filt + 'MAG_AUTO'] > -90
     gal_table[filt + 'MAG_AUTO'][h99g_auto] = gal_table[filt + 'MAG_AUTO'][h99g_auto] - b
-    gal_table[filt + 'ERR_AUTO'][h99g_auto] = np.sqrt(gal_table[filt + 'ERR_AUTO'][h99g_auto] + err_b ** 2)
+    gal_table[filt + 'ERR_AUTO'][h99g_auto] = np.sqrt(gal_table[filt + 'ERR_AUTO'][h99g_auto] ** 2 + err_b ** 2)
 
     h99s_psf = star_table[filt + 'MAG_PSF'] > -90
     star_table[filt + 'MAG_PSF'][h99s_psf] = star_table[filt + 'MAG_PSF'][h99s_psf] - b
     star_table[filt + 'ERR_PSF'][h99s_psf] = np.sqrt(star_table[filt + 'ERR_PSF'][h99s_psf] ** 2 + err_b ** 2)
 
     if make_plot == True:
-        axs[orderx[f], ordery[f]].scatter(x00[h0], y00[h0], c='w', marker='.', s=markersize0, alpha=0.3, edgecolor='k', linewidth=1)
+        axs[orderx[f], ordery[f]].scatter(x00[h0], y00[h0], c='k', marker='.', s=markersize0, alpha=0.25, edgecolor='w', linewidth=0)
         axs[orderx[f], ordery[f]].scatter(x0[cts>0], y0[cts>0], marker='.', s=markersize1, c=cts[cts>0], cmap=cmap, edgecolor='gray', linewidth=0.1)
-        axs[orderx[f], ordery[f]].plot(xline, m * xline + b, '-', color=linecolor, linewidth=linewidth2, label=r'b=${:.6f}\pm{:.6f}$'.format(b, err_b), alpha=linealpha)
+        axs[orderx[f], ordery[f]].plot(xline, m * xline + b, '-', color=linecolor, linewidth=linewidth1, label=r'b=${:.6f}\pm{:.6f}$'.format(b, err_b), alpha=linealpha)
         axs[orderx[f], ordery[f]].grid()
+
+        center_x = np.median(x0[cts > 0])
+        center_y = np.median(y0[cts > 0])
+        ylim_l = center_y - 1.0
+        ylim_h = center_y + 1.5
+
         axs[orderx[f], ordery[f]].set_xlim(xlim_l, xlim_h)
         axs[orderx[f], ordery[f]].set_ylim(ylim_l, ylim_h)
         if fit_mag == 'auto' and my_stars_magtype != 'auto':
@@ -887,6 +1014,7 @@ for f in range(len(filters)):
         else:
             axs[orderx[f], ordery[f]].set_title(filter_lam[f] + r'$\AA$', fontsize=small_title_fontsize, pad=2)
         axs[orderx[f], ordery[f]].legend(loc=1, fontsize='x-small')
+        axs[orderx[f], ordery[f]].tick_params(labelsize=ticksize)
 
 
     # Delete unnecessary variables in the loop
@@ -925,11 +1053,12 @@ elif calibration_cat == 'panstarrs':
     calibration_cat_propername = 'Pan-STARRS1'
 
 if make_plot == True:
-    fig.suptitle(clustername + ', Calibrated with ' + calibration_cat_propername + ', ' + my_stars_magtype.lower())
+    fig.suptitle(clustername + ', Calibrated with ' + calibration_cat_propername + ', ' + my_stars_magtype.lower(), fontsize=titlesize)
+    # fig.suptitle('ABELL 611 (Calibrated with ' + calibration_cat_propername + ')', fontsize=titlesize)# + ', ' + my_stars_magtype.lower())    # used for thesis plots
     fig.add_subplot(111, frameon=False)
     plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
-    plt.xlabel('g - r', labelpad=5)
-    plt.ylabel('narrowband - r', labelpad=20)
+    plt.xlabel('g - r', labelpad=0, fontsize=xlabelsize)
+    plt.ylabel('narrowband - r', labelpad=5, fontsize=ylabelsize)
 
 
 
@@ -941,16 +1070,17 @@ if calibration_cat == 'panstarrs' and os.path.isfile(path + clustername + '_gal_
     h = sdss_zspec > 0
     sdss_zspec = sdss_zspec[h]
     sdss_zspecerr = sdss_gtab['zerr'][h]
-    sdss_ra = sdss_gtab['ra'][h]
-    sdss_dec = sdss_gtab['dec'][h]
-    c_zspec = SkyCoord(sdss_ra, sdss_dec, unit='deg')
-    c_my = SkyCoord(gal_table['ra'], gal_table['dec'], unit='deg')
-    idx, d2d, d3d = c_my.match_to_catalog_sky(c_zspec)
-    h = d2d.arcsec < match_criteria
-    gal_table['zspec'][h] = sdss_zspec[idx[h]]
-    gal_table['zspec_err'][h] = sdss_zspecerr[idx[h]]
+    if len(sdss_zspec) > 0:
+        sdss_ra = sdss_gtab['ra'][h]
+        sdss_dec = sdss_gtab['dec'][h]
+        c_zspec = SkyCoord(sdss_ra, sdss_dec, unit='deg')
+        c_my = SkyCoord(gal_table['ra'], gal_table['dec'], unit='deg')
+        idx, d2d, d3d = c_my.match_to_catalog_sky(c_zspec)
+        h = d2d.arcsec < match_criteria
+        gal_table['zspec'][h] = sdss_zspec[idx[h]]
+        gal_table['zspec_err'][h] = sdss_zspecerr[idx[h]]
 
-    del sdss_gtab, sdss_zspec, h, sdss_zspecerr, sdss_ra, sdss_dec, c_zspec, c_my, idx, d2d, d3d
+        del sdss_gtab, sdss_zspec, h, sdss_zspecerr, sdss_ra, sdss_dec, c_zspec, c_my, idx, d2d, d3d
 
 
 ascii.write(gal_table, output=path + clustername + '_mycatalog_' + calibration_cat + '_gal.csv', format='ecsv', overwrite=True)
@@ -1044,9 +1174,6 @@ ascii.write(gal_eazy, output=path + clustername + '_mycatalog_' + calibration_ca
 # ======================================================================================================  #
 
 
-# Add these values to w1 and w2 mag to get AB mag
-allwise_ab_vega = [2.699, 3.339]  # From Seth
-# allwise_ab_vega = [2.661, 3.301]    # From EAZY filter files
 
 
 zspec = gal_table['zspec']
@@ -1077,7 +1204,13 @@ if apply_extinction == True:
     t['allwise_w2MAG'] = t['allwise_w2MAG'] - w2_extinction
 
 allwise = t['allwise_w1MAG', 'allwise_w1ERR', 'allwise_w2MAG', 'allwise_w2ERR']
-
+for x in range(len(allwise.colnames)):
+    colname_temp = allwise.colnames[x]
+    # hnull = allwise[colname_temp] == 'null'
+    # print(hnull)
+    for xi in range(len(allwise[colname_temp])):
+        if allwise[colname_temp][xi] == 'null':
+            allwise[colname_temp][xi] = null_fillval
 
 filters_all.extend(allwise.colnames[::2])
 hdrs2.extend([filt_Dict_all[allwise.colnames[0]], filt_Dict_all[allwise.colnames[0]].replace('F','E'), filt_Dict_all[allwise.colnames[2]], filt_Dict_all[allwise.colnames[2]].replace('F','E')])

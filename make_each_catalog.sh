@@ -4,13 +4,14 @@
 usage='
 
     In script folder:
-    $ ./make_each_catalog.sh path_to_files/cutoutlist.txt
+    $ ./make_each_catalog.sh path_to_files/cutoutlist.txt [sdss/panstarrs]
 
     In data folder:
-    $ path_to_script/make_each_catalog.sh cutoutlist.txt
+    $ path_to_script/make_each_catalog.sh cutoutlist.txt [sdss/panstarrs]
 
 
 This script creates final photometry catalog for each filter. Also check if SDSS, PanSTARRS catalog and PanSTARRS extinction file exist.
+The second option is to tell the code which SExtractor config file to use.
 
 '
 
@@ -34,6 +35,20 @@ if (( $len_list > 1 )); then
         path=$path/
 fi
 
+cat_type=$2
+if [ $cat_type = sdss ]; then
+    photometry_config=photometry_sdss.sex
+    cats_dirname=cats_sdss
+    if [ ! -d ${path}${cats_dirname} ]; then
+    mkdir ${cats_dirname}
+    fi
+elif [ $cat_type = panstarrs ]; then
+    photometry_config=photometry_panstarrs.sex
+    cats_dirname=cats_panstarrs
+    if [ ! -d ${path}${cats_dirname} ]; then
+    mkdir ${cats_dirname}
+    fi
+fi
 
 
 for file in `cat $list_in`; do
@@ -48,7 +63,7 @@ for file in `cat $list_in`; do
     psfex -c ${script_dir}/extra/psf.psfex ${path}${filename}_psf.cat
     rm ${path}${filename}_psf.cat
     # Find the final photometry
-    sex -c ${script_dir}/extra/photometry.sex ${path}$file -CATALOG_NAME ${path}${base2}.cat -FILTER_NAME ${script_dir}/extra/${conv_filter} -WEIGHT_IMAGE ${path}${filename}.wt.fits -PSF_NAME ${path}${filename}_psf.psf -PARAMETERS_NAME ${script_dir}/extra/photometry.param
+    sex -c ${script_dir}/extra/${photometry_config} ${path}$file -CATALOG_NAME ${path}${cats_dirname}/${base2}.cat -FILTER_NAME ${script_dir}/extra/${conv_filter} -WEIGHT_IMAGE ${path}${filename}.wt.fits -PSF_NAME ${path}${filename}_psf.psf -PARAMETERS_NAME ${script_dir}/extra/photometry.param
 done
 
 clustername=`echo $filename | awk '{split($1,a,"_"); print a[3]}'`
