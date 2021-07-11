@@ -15,8 +15,8 @@ Optional arguments and default values:
     plot=True
     x_cutoff=1.05   (or xcutoff=1.05)
     ransac=200      (or ransac_iterations=200)
-    starmag=hybrid
-    sdssmag=modelmag
+    starmag=hybrid      (can be hybrid, auto, psf)
+    sdssmag=modelmag    (can be modelmag, cmodelmag, petromag)
     psc=0.83
 
 Required files:
@@ -187,6 +187,8 @@ for x in range(rest_arg_start, nargs):
             sdss_calibration_gals_magtype = 'modelMag'
         elif arg_TF == 'cmodelmag':
             sdss_calibration_gals_magtype = 'cmodelMag'
+        elif arg_TF == 'petromag':
+            sdss_calibration_gals_magtype = 'petroMag'
         else:
             print('Incorrect sdss mag type')
             sys.exit()
