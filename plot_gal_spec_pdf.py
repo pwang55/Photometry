@@ -9,7 +9,7 @@ Usage:
     $ python plot_gal_spec_pdf.py path_to_files/clustername_merged_sdss(panstarrs)_allwise_eazy.cat
 
 This script creates a pdf of all spectra with photometry dots on top of them, using clustername_merged_sdss(panstarrs)_allwise_eazy.cat
-
+Important: both clustername_merged_sdss(panstarrs)_allwise_eazy.cat and clustername_merged_sdss(panstarrs)_allwise.zout from /eazy_photz needs to be in the folder!
 
 """
 import warnings

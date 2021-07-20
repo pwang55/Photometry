@@ -80,8 +80,8 @@ STARNNW_NAME     default.nnw    # Neural-Network_Weight table filename
  
 BACK_TYPE        AUTO           # AUTO or MANUAL
 BACK_VALUE       0.0            # Default background value in MANUAL mode
-BACK_SIZE        20             # Background mesh: <size> or <width>,<height>
-BACK_FILTERSIZE  3              # Background filter: <size> or <width>,<height>
+BACK_SIZE        48             # Background mesh: <size> or <width>,<height>
+BACK_FILTERSIZE  1              # Background filter: <size> or <width>,<height>
  
 BACKPHOTO_TYPE   GLOBAL         # can be GLOBAL or LOCAL
 BACKPHOTO_THICK  24             # thickness of the background LOCAL annulus

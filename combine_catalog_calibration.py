@@ -18,6 +18,8 @@ Optional arguments and default values:
     starmag=hybrid      (can be hybrid, auto, psf)
     sdssmag=modelmag    (can be modelmag, cmodelmag, petromag)
     psc=0.83
+    my_gals_magtype_sdss=MAG_AUTO       (can be MAG_AUTO, MAG_PETRO, MAG_MODEL, MAG_HYBRID, MAG_DISK, MAG_SPHEROID)
+    my_gals_magtype_panstarrs=MAG_AUTO  (can be MAG_AUTO, MAG_PETRO, MAG_MODEL, MAG_HYBRID, MAG_DISK, MAG_SPHEROID)
 
 Required files:
 
@@ -200,10 +202,10 @@ for x in range(rest_arg_start, nargs):
         panstarrs_classification_psc = float(arg_TF)
 
     if arg_type == 'my_gals_magtype_sdss':
-        my_gals_magtype_sdss = str(arg_TF)
+        my_gals_magtype_sdss = str(arg_TF).upper()
 
     if arg_type == 'my_gals_magtype_panstarrs':
-        my_gals_magtype_panstarrs = str(arg_TF)
+        my_gals_magtype_panstarrs = str(arg_TF).upper()
 
 
 globfilenames = glob(path + 'cutout_stack_*fits')
