@@ -640,11 +640,11 @@ if read_only == False:
     t1 = time.time()
 
     parent1, child1 = mp.Pipe(duplex=False)
-    p1 = mp.Process(target=combine_catalog, args=(0, child1))
+    p1 = mp.get_context('fork').Process(target=combine_catalog, args=(0, child1))
     p1.start()
 
     parent2, child2 = mp.Pipe(duplex=False)
-    p2 = mp.Process(target=combine_catalog, args=(1, child2))
+    p2 = mp.get_context('fork').Process(target=combine_catalog, args=(1, child2))
     p2.start()
 
     gal_table = parent1.recv()
@@ -890,11 +890,11 @@ for f in range(len(filters)):
     dyp = np.sqrt(dmag_psf[h] ** 2 + dsr[h] ** 2)
 
     parent1, child1 = mp.Pipe(duplex=False)
-    p1 = mp.Process(target=ransac_iterations_fx, args=(x0, y0a, dya, likelihood, child1))
+    p1 = mp.get_context('fork').Process(target=ransac_iterations_fx, args=(x0, y0a, dya, likelihood, child1))
     p1.start()
 
     parent2, child2 = mp.Pipe(duplex=False)
-    p2 = mp.Process(target=ransac_iterations_fx, args=(x0, y0p, dyp, likelihood, child2))
+    p2 = mp.get_context('fork').Process(target=ransac_iterations_fx, args=(x0, y0p, dyp, likelihood, child2))
     p2.start()
 
     x1a, y1a, ctsa, m1sa, b1sa, b1_errsa, mb_corrsa = parent1.recv()
