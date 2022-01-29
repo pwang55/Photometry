@@ -15,8 +15,8 @@ The second option is to tell the code which SExtractor config file to use.
 
 '
 
-# If no argument is given, print doc and exit
-if (( "$#" == 0 )); then
+# If no argument or only one is given, print doc and exit
+if (( "$#" < 2 )); then
 	echo "$usage"
 	exit 1
 fi
