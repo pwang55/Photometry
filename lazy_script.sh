@@ -29,16 +29,16 @@ fi
 script_dir=$(cd `dirname $0` && pwd)
 
 # Run SExtractor on images
-# ~/sources/90Prime/Photometry/make_each_catalog.sh cutoutlist.txt sdss
-# ~/sources/90Prime/Photometry/make_each_catalog.sh cutoutlist.txt panstarrs
+#~/sources/90Prime/Photometry/make_each_catalog.sh cutoutlist.txt sdss
+#~/sources/90Prime/Photometry/make_each_catalog.sh cutoutlist.txt panstarrs
 
 # Combine and calibrate
 python ~/sources/90Prime/Photometry/combine_catalog_calibration.py sdss plot=false
 python ~/sources/90Prime/Photometry/combine_catalog_calibration.py panstarrs plot=false
 
 # Run EAZY on combined catalogs
-~/eazy-photoz/src/eazy -p merged_eazy_sdss.param
-~/eazy-photoz/src/eazy -p merged_eazy_panstarrs.param
+eazy -p merged_eazy_sdss.param
+eazy -p merged_eazy_panstarrs.param
 
 # Combine .zout with .cat and z-specs
 python ~/sources/90Prime/Photometry/zspecs_combine.py
