@@ -29,8 +29,8 @@ fi
 script_dir=$(cd `dirname $0` && pwd)
 
 # Run SExtractor on images
-#~/sources/90Prime/Photometry/make_each_catalog.sh cutoutlist.txt sdss
-#~/sources/90Prime/Photometry/make_each_catalog.sh cutoutlist.txt panstarrs
+~/sources/90Prime/Photometry/make_each_catalog.sh cutoutlist.txt sdss
+~/sources/90Prime/Photometry/make_each_catalog.sh cutoutlist.txt panstarrs
 
 # Combine and calibrate
 python ~/sources/90Prime/Photometry/combine_catalog_calibration.py sdss plot=false
@@ -44,5 +44,5 @@ eazy -p merged_eazy_panstarrs.param
 python ~/sources/90Prime/Photometry/zspecs_combine.py
 
 # TEMP Copy .zall files to plotting folder
-cp eazy_photz/*zall ~/90PrimeData/testing/photometry/plots/
+# cp eazy_photz/*zall ~/90PrimeData/testing/photometry/plots/
 

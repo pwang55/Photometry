@@ -12,6 +12,7 @@ Optional arguments and default values:
 
     match_criteria=1.0
     match=True
+    extinction=true
     plot=True
     x_cutoff=1.05   (or xcutoff=1.05)
     ransac=200      (or ransac_iterations=200)
@@ -172,6 +173,12 @@ for x in range(rest_arg_start, nargs):
         elif arg_TF == 'false':
             make_plot = False
 
+    if arg_type == 'extinction':
+        if arg_TF == 'true':
+            apply_extinction = True
+        elif arg_TF == 'false':
+            apply_extinction = False
+
     if arg_type == 'match_criteria':
         match_criteria = float(arg_TF)
 
@@ -208,9 +215,10 @@ for x in range(rest_arg_start, nargs):
         my_gals_magtype_panstarrs = str(arg_TF).upper()
 
 
-globfilenames = glob(path + 'cutout_stack_*fits')
-globfilenames.extend(glob(path + '*radec.csv'))
-clustername = globfilenames[0].split('/')[-1].split('_')[2]
+# globfilenames = glob(path + 'cutout_stack_*fits')
+globfilenames = glob(path + '*radec.csv')
+# clustername = globfilenames[0].split('/')[-1].split('_')[2]
+clustername = globfilenames[0].split('_')[0]
 
 month = month_Dict[clustername]
 
@@ -228,8 +236,8 @@ if not os.path.exists(path + clustername + '_allwise_radec.txt'):
     sys.exit()
 
 
-print('calibration_cat={}\nmatch={}\nplot={}\nstarmag={}\nmatch_criteria={}\nx_cutoff={}\nransac_iterations={}'.format(calibration_cat, \
-    not read_only, make_plot, my_stars_magtype, match_criteria, x_cutoff, ransac_iterations))
+print('calibration_cat={}\nmatch={}\nextinction={}\nplot={}\nstarmag={}\nmatch_criteria={}\nx_cutoff={}\nransac_iterations={}'.format(calibration_cat, \
+    not read_only, apply_extinction, make_plot, my_stars_magtype, match_criteria, x_cutoff, ransac_iterations))
 if calibration_cat == 'sdss':
     print('sdssmag={}\nmy_gals_magtype={}'.format(sdss_calibration_gals_magtype, my_gals_magtype_sdss))
 elif calibration_cat == 'panstarrs':

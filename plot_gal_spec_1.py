@@ -34,7 +34,7 @@ if len(sys.argv) < 3:
     sys.exit()
 
 
-plt.ion()
+# plt.ion()
 
 ww = 14
 hh = 7
@@ -233,6 +233,7 @@ x = zout_x
 
 if zout_zphot[x] > 0:
     spec = fits.open(specs[x])
+    print(specs[x])
     loglam = spec[1].data['loglam']
     lam = 10 ** loglam
     flux = spec[1].data['flux']
@@ -329,3 +330,6 @@ if zout_zphot[x] > 0:
     plt.tight_layout()
 
 # pdf.close()
+
+# plt.figure()
+plt.show()
